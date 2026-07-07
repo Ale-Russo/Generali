@@ -59,4 +59,13 @@ class Model:
         compConn = list(nx.connected_components(grafo))
         nComp = len(compConn)
         maxComp = max(compConn, key=len)
-        return nNodi, nArchi, bestTre, nComp, maxComp
+        #
+        gradi = list(grafo.degree())
+        nodo_max_grado, max_grado = max(gradi, key=lambda x: x[1])
+        pesi_incidenti = list(self._graph.degree(weight='weight'))
+        nodo_max_peso, max_peso = max(pesi_incidenti, key=lambda x: x[1])
+
+
+
+
+        return nNodi, nArchi, bestTre, nComp, maxComp, nodo_max_grado, max_grado, nodo_max_peso, max_peso

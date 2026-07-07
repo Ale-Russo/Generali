@@ -11,19 +11,22 @@ class Controller:
         self._model = model
 
     def handleCreaGrafo(self, e):
-        self._view.txt_result.controls.clear()
-        self._model.creaGrafo(self._view._ddAnno1.value, self._view._ddAnno2.value)
-        nNodi, nArchi, bestTre, nComp, maxComp = self._model.dettagliGrafo()
-        self._view.txt_result.controls.append(ft.Text(f"Grafo correttamente creato", color="red"))
-        self._view.txt_result.controls.append(ft.Text(f"Numero di nodi: {nNodi}"))
-        self._view.txt_result.controls.append(ft.Text(f"Numero di archi: {nArchi}"))
-        self._view.txt_result.controls.append(ft.Text(f"Archi di peso maggiore:", color="red"))
-        for a in bestTre:
-            self._view.txt_result.controls.append(ft.Text(f"{a[0]} --> {a[1]}: {a[2]["weight"]}"))
-        self._view.txt_result.controls.append(ft.Text(f"Il grafo ha {nComp} componenti connesse", color="red"))
-        self._view.txt_result.controls.append(ft.Text(f"Componente più grande ({len(maxComp)} nodi):", color="red"))
-        for n in maxComp:
-            self._view.txt_result.controls.append(ft.Text(f"{n}"))
+        try:
+            self._view.txt_result.controls.clear()
+            self._model.creaGrafo(self._view._ddAnno1.value, self._view._ddAnno2.value)
+            nNodi, nArchi, bestTre, nComp, maxComp = self._model.dettagliGrafo()
+            self._view.txt_result.controls.append(ft.Text(f"Grafo correttamente creato"))
+            self._view.txt_result.controls.append(ft.Text(f"Numero di nodi: {nNodi}"))
+            self._view.txt_result.controls.append(ft.Text(f"Numero di archi: {nArchi}"))
+            self._view.txt_result.controls.append(ft.Text(f"Archi di peso maggiore:"))
+            for a in bestTre:
+                self._view.txt_result.controls.append(ft.Text(f"{a[0]} --> {a[1]}: {a[2]["weight"]}"))
+            self._view.txt_result.controls.append(ft.Text(f"Il grafo ha {nComp} componenti connesse"))
+            self._view.txt_result.controls.append(ft.Text(f"Componente più grande ({len(maxComp)} nodi):"))
+            for n in maxComp:
+                self._view.txt_result.controls.append(ft.Text(f"{n}"))
+        except Exception as ex:
+            self._view.create_alert(f"Errore nella creazione grafo: {ex}")
         self._view.update_page()
 
     def handle_path(self, e):
@@ -35,5 +38,38 @@ class Controller:
         self._view._ddAnno1.options = yearsDD
         self._view._ddAnno2.options = yearsDD
         self._view.update_page()
+
+    def handleCreaGrafoECCEZIONI(self, e):
+        self._view._txt_result.controls.clear()
+
+        try:
+            self._model.buildGraph()
+
+            self._view._txt_result.controls.append(
+                ft.Text("Grafo correttamente creato.")
+            )
+            self._view._txt_result.controls.append(
+                ft.Text(f"Numero nodi: {self._model.getNumNodi()}")
+            )
+            self._view._txt_result.controls.append(
+                ft.Text(f"Numero archi: {self._model.getNumEdges()}")
+            )
+            self.fillDDArtisti()
+
+            self._view.update_page()
+
+        except Exception as ex:
+            self._view.create_alert(f"Errore nella creazione del grafo: {ex}")
+
+    def controlloNumerico(self):
+        try:
+            N = int(self._view._txtInN.value)
+        except (ValueError, TypeError):
+            self._view.create_alert("Inserisci un valore numerico valido per N.")
+            return
+
+        if N <= 0:
+            self._view.create_alert("N deve essere un intero positivo.")
+            return
 
 

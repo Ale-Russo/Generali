@@ -67,14 +67,32 @@ class Model:
         pesi_incidenti = list(self._graph.degree(weight='weight'))
         nodo_max_peso, max_peso = max(pesi_incidenti, key=lambda x: x[1])
 
+        #nodi della maxComp ordinati in senso decrescente di peso minimo degli archi incidenti  (SEI COOKED)
+        risultato = []
+        for nodo in maxComp:
+            pesi_archi = [dati['weight'] for _, _, dati in self._grafo.edges(nodo, data=True)]
+            if pesi_archi:
+                peso_minimo = min(pesi_archi)
+                risultato.append((nodo, peso_minimo))
+
+        maxCompOrdinata = sorted(risultato, key=lambda x: x[1], reverse=True)
 
 
 
-        return nNodi, nArchi, bestTre, nComp, maxComp, nodo_max_grado, max_grado, nodo_max_peso, max_peso
+        return nNodi, nArchi, bestTre, nComp, maxComp, nodo_max_grado, max_grado, nodo_max_peso, max_peso, maxCompOrdinatan
     #-------------------------------------------------------------------------
     #RICORSIONE
     #-------------------------------------------------------------------------
     #SI CONDIZIONE DI TERMINAZIONE
+
+    def getBestGroup(self, starting_artist, N):
+        self._bestGroup = []
+        self._maxTracks = 0
+        parziale = [starting_artist]
+        self._ricorsione(parziale, N)
+        return self._bestGroup, self._maxTracks
+
+
     def _ricorsione(self, parziale, N):
         if len(parziale) == N:
             total = self._getTotalTracks(parziale)

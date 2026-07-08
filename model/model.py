@@ -1,3 +1,5 @@
+import copy
+
 from database.DAO import DAO
 import networkx as nx
 
@@ -69,3 +71,60 @@ class Model:
 
 
         return nNodi, nArchi, bestTre, nComp, maxComp, nodo_max_grado, max_grado, nodo_max_peso, max_peso
+    #-------------------------------------------------------------------------
+    #RICORSIONE
+    #-------------------------------------------------------------------------
+    #SI CONDIZIONE DI TERMINAZIONE
+    def _ricorsione(self, parziale, N):
+        if len(parziale) == N:
+            total = self._getTotalTracks(parziale)
+            if total > self._maxTracks:
+                self._maxTracks = total
+                self._bestGroup = copy.deepcopy(parziale)
+            return
+
+        for candidate in self._graph.nodes:
+            if candidate in parziale:
+                #skip questo candidato se già inserito in parziale
+                continue
+
+            # verifico se il candidato è adiacente ad almeno un elemento di parziale,
+            # altrimenti skip il resto del codice perchè non è un candidato valido
+            adjacent = any(self._graph.has_edge(candidate, existing) for existing in parziale)
+            if not adjacent:
+                continue
+
+            # verifico che questo candidato non sia connesso a nessun elemento di parziale con un
+            # arco di peso 1
+            blocked = any(self._graph.has_edge(candidate, existing) and self._graph[candidate][existing]['weight'] == 1 for existing in parziale)
+            if blocked:
+                continue
+
+            parziale.append(candidate)
+            self._ricorsione(parziale, N)
+            parziale.pop()
+    #-----------------------------------------------------
+    #NO CONDIZIONE DI TERMINAZIONE
+    def getBestCammino(self, primo):
+        self._bestCammino = []
+        parziale = [self._idMap[int(primo)]]
+        self._ricorsione(parziale)
+        return self._bestCammino
+
+    def _ricorsione(self, parziale):
+        if len(parziale) > len(self._bestCammino):
+            self._bestCammino = copy.deepcopy(parziale)
+
+        #condizioni inserimento
+        ultimo = parziale[-1]
+        for candidate in self._grafo.neighbors(ultimo):
+            if candidate in parziale:
+                continue
+
+            if candidate.Fatturato > ultimo.Fatturato:
+                continue
+
+
+            parziale.append(candidate)
+            self._ricorsione(parziale)
+            parziale.pop()

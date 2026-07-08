@@ -13,7 +13,7 @@ class Controller:
     def handleCreaGrafo(self, e):
         try:
             self._view.txt_result.controls.clear()
-            self._model.creaGrafo(self._view._ddAnno1.value, self._view._ddAnno2.value)
+            self._model.buildGraph(self._view._ddAnno1.value, self._view._ddAnno2.value)
             nNodi, nArchi, bestTre, nComp, maxComp = self._model.dettagliGrafo()
             self._view.txt_result.controls.append(ft.Text(f"Grafo correttamente creato"))
             self._view.txt_result.controls.append(ft.Text(f"Numero di nodi: {nNodi}"))
@@ -37,6 +37,12 @@ class Controller:
         yearsDD = list(map(lambda x: ft.dropdown.Option(x), years))
         self._view._ddAnno1.options = yearsDD
         self._view._ddAnno2.options = yearsDD
+        self._view.update_page()
+
+    def fillDDCustomers(self):
+        customers = self._model.getNodes()
+        customersDD = list(map(lambda x: ft.dropdown.Option(key=str(x.CustomerId), text=x.FirstName+ " "+ x.LastName), customers))
+        self._view._ddClienti.options = customersDD
         self._view.update_page()
 
     def handleCreaGrafoECCEZIONI(self, e):

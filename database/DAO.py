@@ -33,3 +33,28 @@ class DAO():
             cursor.close()
             cnx.close()
         return result
+
+    @staticmethod
+    def RestituisciValore(id):
+        conn = DBConnect.get_connection()
+
+        results = []
+
+        cursor = conn.cursor(dictionary=True)
+        query = """
+                select sum(i.total) as Fatturato
+                from invoice i
+                where i.CustomerId = %s"""
+
+        cursor.execute(query, (id,))
+
+        row = cursor.fetchone()
+
+        if row is not None and row["Fatturato"] is not None:
+            result = row["Fatturato"]
+        else:
+            result = 0
+
+        cursor.close()
+        conn.close()
+        return result

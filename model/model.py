@@ -86,11 +86,14 @@ class Model:
 
 
         return nNodi, nArchi, bestTre, nComp, maxComp, nodo_max_grado, max_grado, nodo_max_peso, max_peso, maxCompOrdinata
+
+
     #-------------------------------------------------------------------------
     #RICORSIONE
     #-------------------------------------------------------------------------
     #SI CONDIZIONE DI TERMINAZIONE
 
+    #CON OGGETTO DI PARTENZA
     def getBestGroup(self, starting_artist, N):
         self._bestGroup = []
         self._maxTracks = 0
@@ -127,6 +130,55 @@ class Model:
             parziale.append(candidate)
             self._ricorsione(parziale, N)
             parziale.pop()
+
+    #SENZA OGGETTO DI PARTENZA
+    import copy
+
+    def getBestGroup(self, K, M, y1, y2):
+        self._bestGroup = []
+        self._maxImp = 0
+
+        # 1. FILTRO PREVENTIVO
+        # Isoliamo solo i team che hanno partecipato ad almeno M campionati.
+        candidati_validi = []
+        for c in self._compConn:
+            if len(c.Risultati) >= M:
+                candidati_validi.append(c)
+
+        # 2. LA CACHE (Il salvavita dell'esame)
+        # Calcoliamo l'indice I una sola volta per ogni team valido e ce lo salviamo in RAM.
+        self._cache_imp = {}
+        for c in candidati_validi:
+            # Usiamo la tua funzione che richiama il DAO!
+            self._cache_imp[c.constructorId] = self.getImpTeam(c, y1, y2)
+
+        # 3. INNESCO RICORSIONE PURE (Combinazioni)
+        # Partiamo con lista vuota e start_index = 0
+        self._ricorsione([], candidati_validi, 0, K)
+
+        return self._bestGroup, self._maxImp
+
+    def _ricorsione(self, parziale, candidati, start_index, K):
+        # CASO BASE: abbiamo i K team
+        if len(parziale) == K:
+            # Calcoliamo la somma pescando istantaneamente dalla RAM (niente DB!)
+            totale = sum(self._cache_imp[c.constructorId] for c in parziale)
+
+            if totale > self._maxImp:
+                self._maxImp = totale
+                self._bestGroup = copy.deepcopy(parziale)
+            return
+
+        # CICLO OTTIMIZZATO (Combinazioni pure)
+        for i in range(start_index, len(candidati)):
+            candidate = candidati[i]
+
+            parziale.append(candidate)
+            self._ricorsione(parziale, candidati, i + 1, K)
+            parziale.pop()
+
+    # La tua funzione getImpTeam va benissimo, lasciala!
+    # Pupi invece CANCELLARE la funzione totI, non serve più.
     #-----------------------------------------------------
     #NO CONDIZIONE DI TERMINAZIONE
     def getBestCammino(self, primo):

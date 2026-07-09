@@ -29,6 +29,8 @@ class Controller:
             self._view.create_alert(f"Errore nella creazione grafo: {ex}")
         self._view.update_page()
 
+
+
     def handle_path(self, e):
         pass
 

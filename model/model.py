@@ -51,6 +51,12 @@ class Model:
         for e in allEdges:
             self._graph.add_edge(e.p1, e.p2, weight= e.peso)
 
+    def basiGrafo(self):
+        grafo = self._grafo
+        nNodi = len(grafo.nodes())
+        nArchi = len(grafo.edges())
+        return nNodi, nArchi
+
     def dettagliGrafo(self):
         grafo = self._grafo
         nNodi = len(grafo.nodes())
@@ -79,7 +85,7 @@ class Model:
 
 
 
-        return nNodi, nArchi, bestTre, nComp, maxComp, nodo_max_grado, max_grado, nodo_max_peso, max_peso, maxCompOrdinatan
+        return nNodi, nArchi, bestTre, nComp, maxComp, nodo_max_grado, max_grado, nodo_max_peso, max_peso, maxCompOrdinata
     #-------------------------------------------------------------------------
     #RICORSIONE
     #-------------------------------------------------------------------------
@@ -129,6 +135,13 @@ class Model:
         self._ricorsione(parziale)
         return self._bestCammino
 
+    def getBestCammino2(self):  #SE NON C'E' UN ELEMENTO DI PARTENZA NELLA LISTA
+        self._bestCammino = []
+        for nodo in self._grafo.nodes:
+            if nodo.Essential != "?":
+                self._ricorsione([nodo])
+        return self._bestCammino
+
     def _ricorsione(self, parziale):
         if len(parziale) > len(self._bestCammino):
             self._bestCammino = copy.deepcopy(parziale)
@@ -146,3 +159,4 @@ class Model:
             parziale.append(candidate)
             self._ricorsione(parziale)
             parziale.pop()
+

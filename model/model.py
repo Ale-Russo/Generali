@@ -68,9 +68,10 @@ class Model:
         nComp = len(compConn)
         maxComp = max(compConn, key=len)
         #
-        gradi = list(grafo.degree())
+        gradi = list(grafo.degree()) #NODO CON GRADO MAGGIORE
         nodo_max_grado, max_grado = max(gradi, key=lambda x: x[1])
-        pesi_incidenti = list(self._graph.degree(weight='weight'))
+
+        pesi_incidenti = list(self._graph.degree(weight='weight')) #NODO CON PESO MAGGIORE
         nodo_max_peso, max_peso = max(pesi_incidenti, key=lambda x: x[1])
 
         #nodi della maxComp ordinati in senso decrescente di peso minimo degli archi incidenti  (SEI COOKED)
@@ -83,9 +84,20 @@ class Model:
 
         maxCompOrdinata = sorted(risultato, key=lambda x: x[1], reverse=True)
 
+        #PESO ARCHI USCENTI - PESO ARCHI ENTRANTI
+        infMax = -1
+        bestNode = None
+        for n in grafo.nodes:
+            inf = grafo.out_degree(n, weight="weight") - grafo.in_degree(n, weight="weight")
+            if inf > infMax:
+                bestNode = self._idMap[n.CustomerId]
+                infMax = inf
 
 
-        return nNodi, nArchi, bestTre, nComp, maxComp, nodo_max_grado, max_grado, nodo_max_peso, max_peso, maxCompOrdinata
+
+
+
+        return nNodi, nArchi, bestTre, nComp, maxComp, nodo_max_grado, max_grado, nodo_max_peso, max_peso, maxCompOrdinata, bestNode
 
 
     #-------------------------------------------------------------------------
@@ -211,4 +223,39 @@ class Model:
             parziale.append(candidate)
             self._ricorsione(parziale)
             parziale.pop()
+
+    def getBestCammino3(self):  #GRAFO ORIENTATO E DIZIONARIO PER TOTALITA' DATI
+        self._bestCammino = []
+        self._bestScore = 0
+
+        for nodo in self._grafo.nodes:
+            mese_partenza = nodo.datetime.month
+            mesi_count = {mese_partenza: 1}
+            self._ricorsione([nodo], mesi_count)
+
+        return self._bestCammino, self._bestScore
+
+    def _ricorsione(self, parziale, mesi_count):
+        score_attuale = self._getPunteggio(parziale)
+        if score_attuale > self._bestScore:
+            self._bestScore = score_attuale
+            self._bestCammino = copy.deepcopy(parziale)
+
+        ultimo = parziale[-1]
+
+        for candidate in self._grafo.successors(ultimo):
+            if candidate.duration <= ultimo.duration:
+                continue
+
+            mese_cand = candidate.datetime.month
+            if mesi_count.get(mese_cand, 0) >= 3:
+                continue
+
+            parziale.append(candidate)
+            mesi_count[mese_cand] = mesi_count.get(mese_cand, 0) + 1
+
+            self._ricorsione(parziale, mesi_count)
+
+            parziale.pop()
+            mesi_count[mese_cand] -= 1
 

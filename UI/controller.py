@@ -47,6 +47,16 @@ class Controller:
         self._view._ddClienti.options = customersDD
         self._view.update_page()
 
+    def fillDDShapes(self, e):  #QUANDO NECESSARIO UN ALTRO VALORE DELLA VIEW
+        v = self._view
+        y = v.ddyear.value
+        if y is None:
+            return
+        shapes = self._model.getAllShapes(y)
+        shapesDD = list(map(lambda x: ft.dropdown.Option(x), shapes))
+        self._view.ddshape.options = shapesDD
+        self._view.update_page()
+
     def handleCreaGrafoECCEZIONI(self, e):
         self._view._txt_result.controls.clear()
 

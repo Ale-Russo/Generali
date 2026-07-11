@@ -12,19 +12,19 @@ class Controller:
 
     def handleCreaGrafo(self, e):
         try:
-            self._view.txt_result.controls.clear()
+            self._view._txt_result.controls.clear()
             self._model.buildGraph(self._view._ddAnno1.value, self._view._ddAnno2.value)
             nNodi, nArchi, bestTre, nComp, maxComp = self._model.dettagliGrafo()
-            self._view.txt_result.controls.append(ft.Text(f"Grafo correttamente creato"))
-            self._view.txt_result.controls.append(ft.Text(f"Numero di nodi: {nNodi}"))
-            self._view.txt_result.controls.append(ft.Text(f"Numero di archi: {nArchi}"))
-            self._view.txt_result.controls.append(ft.Text(f"Archi di peso maggiore:"))
+            self._view._txt_result.controls.append(ft.Text(f"Grafo correttamente creato"))
+            self._view._txt_result.controls.append(ft.Text(f"Numero di nodi: {nNodi}"))
+            self._view._txt_result.controls.append(ft.Text(f"Numero di archi: {nArchi}"))
+            self._view._txt_result.controls.append(ft.Text(f"Archi di peso maggiore:"))
             for a in bestTre:
-                self._view.txt_result.controls.append(ft.Text(f"{a[0]} --> {a[1]}: {a[2]["weight"]}"))
-            self._view.txt_result.controls.append(ft.Text(f"Il grafo ha {nComp} componenti connesse"))
-            self._view.txt_result.controls.append(ft.Text(f"Componente più grande ({len(maxComp)} nodi):"))
+                self._view._txt_result.controls.append(ft.Text(f"{a[0]} --> {a[1]}: {a[2]["weight"]}"))
+            self._view._txt_result.controls.append(ft.Text(f"Il grafo ha {nComp} componenti connesse"))
+            self._view._txt_result.controls.append(ft.Text(f"Componente più grande ({len(maxComp)} nodi):"))
             for n in maxComp:
-                self._view.txt_result.controls.append(ft.Text(f"{n}"))
+                self._view._txt_result.controls.append(ft.Text(f"{n}"))
         except Exception as ex:
             self._view.create_alert(f"Errore nella creazione grafo: {ex}")
         self._view.update_page()
@@ -89,5 +89,56 @@ class Controller:
         if N <= 0:
             self._view.create_alert("N deve essere un intero positivo.")
             return
+
+    def handleSelezione(self, e):
+        self._view._txt_result.controls.clear()
+
+        if self._model.getNumNodi() == 0:
+            self._view.create_alert("Creare prima il grafo.")
+            return
+
+        if self._artistaValue is None:
+            self._view.create_alert("Selezionare un artista dal menu a tendina.")
+            return
+
+        try:
+            N = int(self._view._txtInN.value)
+        except (ValueError, TypeError):
+            self._view.create_alert("Inserisci un valore numerico valido per N.")
+            return
+
+        if N <= 0:
+            self._view.create_alert("N deve essere un intero positivo.")
+            return
+
+        try:
+            best_group, total_tracks = self._model.getBestGroup(self._artistaValue, N)
+
+            if not best_group:
+                self._view._txt_result.controls.append(
+                    ft.Text("Nessun gruppo trovato.")
+                )
+                self._view.update_page()
+                return
+
+            sorted_group = sorted(best_group, key=lambda a: a.Name)
+
+            self._view._txt_result.controls.append(
+                ft.Text("Lista degli artisti selezionati:")
+            )
+            self._view._txt_result.controls.append(ft.Text(""))
+
+            for artist in sorted_group:
+                num_albums = self._model.getNumAlbumsForArtist(artist.ArtistId)
+                num_tracks = len(artist.Tracks)
+                num_playlists = len(artist.Playlists)
+            self._view._txt_result.controls.append(ft.Text(f"  - {artist}: album: {num_albums}, "f"brani: {num_tracks}, playlist: {num_playlists}"))
+            self._view._txt_result.controls.append(ft.Text(""))
+            self._view._txt_result.controls.append(ft.Text(f"Numero totale di artisti selezionati: {len(best_group)}"))
+            self._view._txt_result.controls.append(ft.Text(f"Numero complessivo di brani: {total_tracks}"))
+            self._view.update_page()
+
+        except Exception as ex:
+            self._view.create_alert(f"Errore nella ricerca del gruppo: {ex}")
 
 

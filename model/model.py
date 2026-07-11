@@ -11,8 +11,8 @@ class Model:
         return DAO.getAnni()
 
     def buildGraphPESATO_NON_ORIENTATO(self, anno1, anno2):     #PESATO NON ORIENTATO
-        graph = self._graph
-        graph.clear()
+        grafo = self._grafo
+        grafo.clear()
         circuiti = DAO.getAllCircuits()
         for c in circuiti:
             c.risultati = {}
@@ -22,7 +22,7 @@ class Model:
                     c.risultati[r["year"]] = []
 
                 c.risultati[r["year"]].append((r["driverId"], r["position"]))
-        graph.add_nodes_from(circuiti)
+        grafo.add_nodes_from(circuiti)
 
         for c in DAO.getAllPesi(anno1, anno2):
             self._arrivi[c["circuitId"]] = c["arrivi"]
@@ -37,7 +37,7 @@ class Model:
                 if len(anni_c1) > 0 and len(anni_c2) > 0 :
                     peso = self._arrivi.get(c1.circuitId,0)+self._arrivi.get(c2.circuitId,0)
                     if peso > 0:
-                        graph.add_edge(c1,c2, weight=peso)
+                        grafo.add_edge(c1,c2, weight=peso)
 
     def buildGraphPESATO_ORIENTATO(self, cat, date1, date2):
         self._graph.clear()
@@ -92,6 +92,23 @@ class Model:
             if inf > infMax:
                 bestNode = self._idMap[n.CustomerId]
                 infMax = inf
+
+        #NODI CON NUMERO DI ARCHI USCENTI MAGGIORE E PESO TOTALE (SOMMA) DI QUESTI ULTIMI
+        statistiche_nodi = []
+        for nodo in self._grafo.nodes:
+            archi_uscenti = self._grafo.out_edges(nodo, data=True)
+            num_uscenti = len(archi_uscenti)
+            peso_totale = 0
+            for u, v, dati in archi_uscenti:
+                peso_totale += dati["weight"]
+            statistiche_nodi.append((nodo, num_uscenti, peso_totale))
+        ordinati = sorted(statistiche_nodi, key=lambda x: x[1], reverse=True)
+        bestFive = ordinati[:5]
+
+        #LISTA ARCHI USCENTI DAL NODO
+        grafo.out_edges(n)
+        #NUMERO ARCHI USCENTI DAL NODO
+        grafo.out_degree(n)
 
 
 
@@ -190,7 +207,7 @@ class Model:
             parziale.pop()
 
     # La tua funzione getImpTeam va benissimo, lasciala!
-    # Pupi invece CANCELLARE la funzione totI, non serve più.
+    # Puoi invece CANCELLARE la funzione totI, non serve più.
     #-----------------------------------------------------
     #NO CONDIZIONE DI TERMINAZIONE
     def getBestCammino(self, primo):
@@ -223,6 +240,7 @@ class Model:
             parziale.append(candidate)
             self._ricorsione(parziale)
             parziale.pop()
+
 
     def getBestCammino3(self):  #GRAFO ORIENTATO E DIZIONARIO PER TOTALITA' DATI
         self._bestCammino = []
@@ -258,4 +276,32 @@ class Model:
 
             parziale.pop()
             mesi_count[mese_cand] -= 1
+
+    #ROBE DI ARCHI
+    def getBestCammino4(self, primo):
+        self._bestCammino = []
+        parziale = [self._idMap[int(primo)]]
+        self._ricorsione(parziale)
+        return self._bestCammino
+
+    def _ricorsione(self, parziale):
+        if len(parziale) > len(self._bestCammino):
+            self._bestCammino = copy.deepcopy(parziale)
+        #condizioni inserimento
+        ultimo = parziale[-1]
+        for candidate in self._grafo.neighbors(ultimo):
+            if candidate in parziale:
+                continue
+
+            if len(parziale) > 1:
+                penultimo = parziale[-2]
+                peso_ultimo = self._grafo[penultimo][ultimo]["weight"]
+                peso_candidato = self._grafo[ultimo][candidate]["weight"]
+                if peso_candidato < peso_ultimo:
+                    continue
+
+
+            parziale.append(candidate)
+            self._ricorsione(parziale)
+            parziale.pop()
 

@@ -25,4 +25,12 @@ tabella names:
 -height
 -known_for_movies (sono codici dei film separati da virgola)
 
+
+tip
+
+La tabella `genre` è separata da `movie`. Questo vuol dire che un film come "Inception"
+avrà una riga in `movie`, ma potrebbe avere tre righe in `genre` (Action, Sci-Fi, Thriller).
+Se fai una JOIN secca tra `movie` e `genre` senza i dovuti accorgimenti (come un `GROUP BY` o un `DISTINCT`),
+il film ti uscirà triplicato nei risultati e le tue medie sui voti o sui guadagni sballeranno in un secondo.
+
 """

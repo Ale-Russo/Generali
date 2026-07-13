@@ -115,19 +115,14 @@ class Controller:
             best_group, total_tracks = self._model.getBestGroup(self._artistaValue, N)
 
             if not best_group:
-                self._view._txt_result.controls.append(
-                    ft.Text("Nessun gruppo trovato.")
-                )
+                self._view._txt_result.controls.append(ft.Text("Nessun gruppo trovato."))
                 self._view.update_page()
                 return
 
             sorted_group = sorted(best_group, key=lambda a: a.Name)
 
-            self._view._txt_result.controls.append(
-                ft.Text("Lista degli artisti selezionati:")
-            )
+            self._view._txt_result.controls.append(ft.Text("Lista degli artisti selezionati:"))
             self._view._txt_result.controls.append(ft.Text(""))
-
             for artist in sorted_group:
                 num_albums = self._model.getNumAlbumsForArtist(artist.ArtistId)
                 num_tracks = len(artist.Tracks)

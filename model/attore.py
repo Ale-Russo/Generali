@@ -10,6 +10,7 @@ class Attore:
     date_of_birth: datetime
     known_for_movies: str
 
+
     def __hash__(self):
         return hash(self.id)
 

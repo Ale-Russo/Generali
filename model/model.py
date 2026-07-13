@@ -305,3 +305,12 @@ class Model:
             self._ricorsione(parziale)
             parziale.pop()
 
+    def getPesoArchiCammino(self, parziale):
+        peso = 0
+        if len(parziale) > 1:
+            for i in range(len(parziale)-1):
+                corrente = parziale[i]
+                prossimo = parziale[i+1]
+                peso+=  self._grafo[corrente][prossimo]["weight"]
+        return peso
+
